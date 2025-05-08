@@ -910,9 +910,13 @@ void AudioDriverWASAPI::thread_func(void *p_udata) {
 								r = read_sample(ad->audio_input.format_tag, ad->audio_input.bits_per_sample, data, j * 2 + 1);
 							} else if (ad->audio_input.channels == 1) {
 								l = r = read_sample(ad->audio_input.format_tag, ad->audio_input.bits_per_sample, data, j);
-							} else {
+							}else if (ad->audio_input.channels > 2) { // hack fix: just grabbed first 2 channels
+								// they are just int32s so I experimented with averaging alternating channels, it worked but idk if it's correct
+								l = read_sample(ad->audio_input.format_tag, ad->audio_input.bits_per_sample, data, j * ad->audio_input.channels);
+								r = read_sample(ad->audio_input.format_tag, ad->audio_input.bits_per_sample, data, j * ad->audio_input.channels + 1);
+							}else {
 								l = r = 0;
-								ERR_PRINT("WASAPI: unsupported channel count in microphone!");
+								ERR_PRINT("WASAPI: unsupported zero or negative channel count in microphone!");
 							}
 						}
 
